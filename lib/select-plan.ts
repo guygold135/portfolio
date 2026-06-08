@@ -1,0 +1,10 @@
+export const PLAN_SELECTED_EVENT = "plan-selected"
+
+export function selectPlanAndScrollToContact(planId: string) {
+  const url = new URL(window.location.href)
+  url.searchParams.set("plan", planId)
+  url.hash = "contact"
+  window.history.replaceState(null, "", `${url.pathname}${url.search}${url.hash}`)
+  window.dispatchEvent(new CustomEvent(PLAN_SELECTED_EVENT, { detail: planId }))
+  document.getElementById("contact")?.scrollIntoView({ behavior: "smooth", block: "start" })
+}

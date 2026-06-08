@@ -1,0 +1,128 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+@import 'shadcn/tailwind.css';
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --font-heading: var(--font-heebo), 'Heebo Fallback';
+  --font-sans: var(--font-assistant), 'Assistant Fallback';
+  --font-mono: var(--font-assistant), 'Assistant Fallback';
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --color-foreground: var(--foreground);
+  --color-background: var(--background);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+:root {
+  --background: oklch(0.216 0.006 56);
+  --foreground: oklch(0.97 0.002 90);
+  --card: oklch(0.268 0.006 56);
+  --card-foreground: oklch(0.97 0.002 90);
+  --popover: oklch(0.268 0.006 56);
+  --popover-foreground: oklch(0.97 0.002 90);
+  --primary: oklch(0.97 0.002 90);
+  --primary-foreground: oklch(0.216 0.006 56);
+  --secondary: oklch(0.318 0.006 56);
+  --secondary-foreground: oklch(0.87 0.002 90);
+  --muted: oklch(0.318 0.006 56);
+  --muted-foreground: oklch(0.708 0.006 58);
+  --accent: oklch(0.97 0.002 90);
+  --accent-foreground: oklch(0.216 0.006 56);
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: oklch(0.373 0.006 56);
+  --input: oklch(0.439 0.006 56);
+  --ring: oklch(0.97 0.002 90);
+  --radius: 0.5rem;
+  --sidebar: oklch(0.216 0.006 56);
+  --sidebar-foreground: oklch(0.97 0.002 90);
+  --sidebar-primary: oklch(0.97 0.002 90);
+  --sidebar-primary-foreground: oklch(0.216 0.006 56);
+  --sidebar-accent: oklch(0.318 0.006 56);
+  --sidebar-accent-foreground: oklch(0.97 0.002 90);
+  --sidebar-border: oklch(0.373 0.006 56);
+  --sidebar-ring: oklch(0.553 0.006 58);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-stone-900 text-stone-300 antialiased;
+  }
+  html {
+    @apply font-sans;
+    scroll-behavior: smooth;
+  }
+  section[id] {
+    scroll-margin-top: 5rem;
+  }
+}
+
+@layer utilities {
+  .link-underline {
+    @apply relative inline-flex items-center transition-all duration-300;
+  }
+  .link-underline::after {
+    content: '';
+    @apply absolute bottom-0 right-0 h-px w-0 bg-stone-100 transition-all duration-300;
+  }
+  .link-underline:hover::after {
+    @apply w-full;
+  }
+  .btn-premium {
+    @apply relative border border-stone-100 bg-stone-100 px-8 py-3.5 text-sm font-semibold tracking-wide text-stone-900 no-underline shadow-sm shadow-stone-950/20 transition-all duration-300;
+  }
+  .btn-premium:hover,
+  .btn-premium:focus-visible,
+  .btn-premium:active {
+    @apply border-stone-50 bg-stone-50 text-stone-900 opacity-100;
+  }
+  .hero-marquee-track {
+    animation: hero-marquee 50s linear infinite;
+  }
+}
+
+@keyframes hero-marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
