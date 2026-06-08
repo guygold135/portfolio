@@ -2,42 +2,26 @@
 
 import Image from "next/image"
 import { useCallback, useEffect, useState } from "react"
-import { ArrowLeft } from "lucide-react"
-
-type Project = {
-  title: string
-  description: string
-  url: string
-  image: string
-}
-
-const projects: Project[] = [
-  {
-    title: "BE PILATES studio",
-    description:
-      "דף נחיתה בוטיק ויוקרתי לסטודיו פילאטיס, עם גלילה חלקה, ביקורות מתוך Google Maps והמרה דרך טופס.",
-    url: "https://pilates1.vercel.app/",
-    image: "/images/portfolio/pilates.png",
-  },
-  {
-    title: "Luxury Japan Tour",
-    description:
-      "טיול צילום אקסקלוסיבי ויוקרתי ביפן, עם טיפוגרפיה פרימיום, גריד נקי ותחושת מותג בינלאומית.",
-    url: "https://japanjourney-woad.vercel.app/",
-    image: "/images/portfolio/japan.png",
-  },
-  {
-    title: "Burger Demo Shop",
-    description:
-      "דף מסעדת המבורגרים מקומית מהיר וממוקד המרה, עם תפריטים דינמיים והוכחה חברתית מהלקוחות.",
-    url: "https://burger-demo-black.vercel.app/#proof",
-    image: "/images/portfolio/burger.png",
-  },
-]
+import { ArrowLeft, ArrowRight } from "lucide-react"
+import { useLanguage } from "@/lib/i18n/language-context"
+import type { Project } from "@/lib/i18n/translations"
 
 const INTERVAL_MS = 4000
 
-function ProjectSlide({ project, isActive }: { project: Project; isActive: boolean }) {
+function ProjectSlide({
+  project,
+  isActive,
+  viewLive,
+  previewAlt,
+}: {
+  project: Project
+  isActive: boolean
+  viewLive: string
+  previewAlt: (title: string) => string
+}) {
+  const { locale } = useLanguage()
+  const LinkArrow = locale === "he" ? ArrowLeft : ArrowRight
+
   return (
     <article
       aria-hidden={!isActive}
@@ -58,7 +42,7 @@ function ProjectSlide({ project, isActive }: { project: Project; isActive: boole
           <div className="relative aspect-video w-full overflow-hidden">
             <Image
               src={project.image}
-              alt={`תצוגה מקדימה של ${project.title}`}
+              alt={previewAlt(project.title)}
               fill
               sizes="(max-width: 1024px) 100vw, 60vw"
               className={`object-cover object-top transition-transform duration-700 ${isActive ? "scale-100" : "scale-105"} group-hover:scale-105`}
@@ -82,8 +66,8 @@ function ProjectSlide({ project, isActive }: { project: Project; isActive: boole
             tabIndex={isActive ? 0 : -1}
             className="link-underline mt-8 inline-flex items-center gap-2 pb-1 text-sm font-semibold text-stone-50 transition-all duration-300"
           >
-            צפייה באתר החי
-            <ArrowLeft className="size-3.5" />
+            {viewLive}
+            <LinkArrow className="size-3.5" />
           </a>
         </div>
       </div>
@@ -92,12 +76,18 @@ function ProjectSlide({ project, isActive }: { project: Project; isActive: boole
 }
 
 export function PortfolioSection() {
+  const { t, locale } = useLanguage()
+  const projects = t.portfolio.projects
   const [active, setActive] = useState(0)
   const [paused, setPaused] = useState(false)
 
   const goTo = useCallback((index: number) => {
     setActive(index)
   }, [])
+
+  useEffect(() => {
+    setActive(0)
+  }, [locale])
 
   useEffect(() => {
     if (paused) return
@@ -107,17 +97,17 @@ export function PortfolioSection() {
     }, INTERVAL_MS)
 
     return () => clearInterval(timer)
-  }, [paused])
+  }, [paused, projects.length])
 
   return (
     <section id="portfolio" className="border-t border-stone-700/60 py-24 md:py-32">
       <div className="mx-auto max-w-6xl px-6">
         <div className="mb-16 max-w-2xl">
           <h2 className="text-balance font-heading text-3xl font-black tracking-tight text-stone-50 md:text-5xl">
-            פרויקטים נבחרים מהסטודיו
+            {t.portfolio.title}
           </h2>
           <p className="mt-6 text-pretty text-lg leading-loose text-stone-400">
-            תערובת של דפי נחיתה ואתרים שבנינו — כל אחד מעוצב להמרה, למהירות ולחוויית מובייל מושלמת.
+            {t.portfolio.subtitle}
           </p>
         </div>
 
@@ -129,7 +119,13 @@ export function PortfolioSection() {
           onBlur={() => setPaused(false)}
         >
           {projects.map((project, index) => (
-            <ProjectSlide key={project.title} project={project} isActive={index === active} />
+            <ProjectSlide
+              key={project.title}
+              project={project}
+              isActive={index === active}
+              viewLive={t.portfolio.viewLive}
+              previewAlt={t.portfolio.previewAlt}
+            />
           ))}
         </div>
 
@@ -138,7 +134,7 @@ export function PortfolioSection() {
             <button
               key={project.title}
               type="button"
-              aria-label={`מעבר לפרויקט ${project.title}`}
+              aria-label={t.portfolio.goToProject(project.title)}
               aria-current={index === active ? "true" : undefined}
               onClick={() => goTo(index)}
               className={`h-1.5 rounded-full transition-all duration-300 ${

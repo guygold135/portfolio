@@ -1,10 +1,12 @@
 "use client"
 
 import { Check } from "lucide-react"
-import { plans, type Plan } from "@/lib/plans"
+import { getPlans, type PlanTranslation } from "@/lib/plans"
+import { useLanguage } from "@/lib/i18n/language-context"
 import { selectPlanAndScrollToContact } from "@/lib/select-plan"
 
-function PlanCard({ plan }: { plan: Plan }) {
+function PlanCard({ plan }: { plan: PlanTranslation }) {
+  const { t } = useLanguage()
   const isFeatured = plan.featured
 
   return (
@@ -18,7 +20,7 @@ function PlanCard({ plan }: { plan: Plan }) {
       <div className="mb-6 min-h-[1.125rem]">
         {isFeatured && (
           <span className="text-[11px] font-medium uppercase tracking-[0.2em] text-stone-600">
-            הכי נמכר
+            {t.pricing.bestSeller}
           </span>
         )}
       </div>
@@ -40,10 +42,24 @@ function PlanCard({ plan }: { plan: Plan }) {
         >
           {plan.price}
         </span>
-        <span className={`text-sm ${isFeatured ? "text-stone-500" : "text-stone-500"}`}>החל מ־</span>
+        <span className={`text-sm ${isFeatured ? "text-stone-500" : "text-stone-500"}`}>
+          {t.pricing.startingFrom}
+        </span>
       </div>
 
-      <ul className="mt-10 flex-1 space-y-4">
+      {plan.note && (
+        <div
+          className={`mt-8 rounded-lg border px-4 py-3.5 ${
+            isFeatured
+              ? "border border-green-600/80 bg-stone-900/5 text-stone-800"
+              : "border-green-400/40 bg-stone-800/50 text-stone-100"
+          }`}
+        >
+          <p className="text-sm font-semibold leading-relaxed">{plan.note}</p>
+        </div>
+      )}
+
+      <ul className={`flex-1 space-y-4 ${plan.note ? "mt-6" : "mt-10"}`}>
         {plan.features.map((feature) => (
           <li
             key={feature}
@@ -71,7 +87,7 @@ function PlanCard({ plan }: { plan: Plan }) {
               : "border-stone-100 bg-transparent text-stone-50 hover:bg-stone-100 hover:text-stone-900"
           }`}
         >
-          בחירת חבילה
+          {t.pricing.selectPlan}
         </a>
       </div>
     </article>
@@ -79,16 +95,18 @@ function PlanCard({ plan }: { plan: Plan }) {
 }
 
 export function PricingSection() {
+  const { locale, t } = useLanguage()
+  const plans = getPlans(locale)
+
   return (
     <section id="pricing" className="border-t border-stone-700/60 py-24 md:py-32">
       <div className="mx-auto max-w-6xl px-6">
         <div className="mb-20 max-w-2xl">
           <h2 className="text-balance font-heading text-3xl font-black tracking-tight text-stone-50 md:text-5xl">
-            חבילות ומחירים
+            {t.pricing.title}
           </h2>
           <p className="mt-6 text-pretty text-lg leading-loose text-stone-400">
-            שלוש חבילות גמישות שמתאימות לכל שלב בעסק — מהשקה ראשונית ועד אתר מתקדם עם חנות. כל המחירים
-            כוללים עיצוב מותאם אישית.
+            {t.pricing.subtitle}
           </p>
         </div>
 

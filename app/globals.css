@@ -89,7 +89,9 @@
     @apply font-sans;
     scroll-behavior: smooth;
   }
-  section[id] {
+  section[id],
+  #contact,
+  #contact-info {
     scroll-margin-top: 5rem;
   }
 }
