@@ -2,40 +2,68 @@
 
 import type React from "react"
 
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { useSearchParams } from "next/navigation"
 import { ArrowLeft, ArrowRight, Check, Mail, MessageCircle } from "lucide-react"
-import { getPlanById, getPlans } from "@/lib/plans"
+import { getPlanById, getPlans, UNSURE_PLAN_ID } from "@/lib/plans"
 import { useLanguage } from "@/lib/i18n/language-context"
 import { PLAN_SELECTED_EVENT } from "@/lib/select-plan"
 
 const CONTACT_EMAIL = "guygold1355@gmail.com"
 const CONTACT_WHATSAPP = "0526199901"
 const WHATSAPP_LINK = "https://wa.me/972526199901"
+const FORMSPREE_ENDPOINT = "https://formspree.io/f/xpqerlza"
 
 const inputClassName =
   "w-full border-b border-stone-600 bg-transparent px-0 py-3 text-base text-stone-50 placeholder:text-stone-600 outline-none transition-all duration-300 focus:border-stone-100 rounded-none"
+
+const ISRAELI_PHONE_REGEX = /^(05\d{8}|0[2-46789]\d{7})$/
+
+function sanitizePhoneInput(value: string) {
+  return value.replace(/\D/g, "").slice(0, 10)
+}
+
+function isValidIsraeliPhone(value: string) {
+  return ISRAELI_PHONE_REGEX.test(value)
+}
 
 export function ContactSection() {
   const searchParams = useSearchParams()
   const { locale, t } = useLanguage()
   const plans = getPlans(locale)
   const [submitted, setSubmitted] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
+  const [submitError, setSubmitError] = useState("")
+  const [phoneError, setPhoneError] = useState("")
   const [name, setName] = useState("")
   const [phone, setPhone] = useState("")
   const [selectedPlan, setSelectedPlan] = useState("")
+  const isMountedRef = useRef(false)
+
+  useEffect(() => {
+    isMountedRef.current = true
+    return () => {
+      isMountedRef.current = false
+    }
+  }, [])
 
   useEffect(() => {
     const planId = searchParams.get("plan")
-    if (planId && getPlanById(planId, locale)) {
-      setSelectedPlan(planId)
-    }
+    if (!planId || !getPlanById(planId, locale)) return
+
+    const frame = requestAnimationFrame(() => {
+      if (isMountedRef.current) {
+        setSelectedPlan(planId)
+      }
+    })
+
+    return () => cancelAnimationFrame(frame)
   }, [searchParams, locale])
 
   useEffect(() => {
     function onPlanSelected(event: Event) {
       const planId = (event as CustomEvent<string>).detail
-      if (getPlanById(planId, locale)) {
+      if (isMountedRef.current && getPlanById(planId, locale)) {
         setSelectedPlan(planId)
       }
     }
@@ -44,10 +72,60 @@ export function ContactSection() {
     return () => window.removeEventListener(PLAN_SELECTED_EVENT, onPlanSelected)
   }, [locale])
 
-  function handleSubmit(e: React.FormEvent) {
+  function getSelectedPlanLabel() {
+    if (selectedPlan === UNSURE_PLAN_ID) return t.contact.unsurePlanOption
+    const plan = getPlanById(selectedPlan, locale)
+    return plan ? `${plan.name} — ${plan.price}` : selectedPlan
+  }
+
+  function handlePhoneChange(e: React.ChangeEvent<HTMLInputElement>) {
+    setPhone(sanitizePhoneInput(e.target.value))
+    if (phoneError) setPhoneError("")
+    if (submitError) setSubmitError("")
+  }
+
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    if (!name.trim() || !phone.trim() || !selectedPlan) return
-    setSubmitted(true)
+    if (!name.trim() || !phone.trim() || !selectedPlan || submitting) return
+
+    if (!isValidIsraeliPhone(phone)) {
+      setPhoneError(t.contact.phoneInvalid)
+      return
+    }
+
+    setSubmitting(true)
+    setSubmitError("")
+    setPhoneError("")
+
+    try {
+      const response = await fetch(FORMSPREE_ENDPOINT, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify({
+          name: name.trim(),
+          phone: phone.trim(),
+          plan: getSelectedPlanLabel(),
+          _subject: `New studio lead — ${name.trim()}`,
+        }),
+      })
+
+      if (!response.ok) throw new Error("Formspree submission failed")
+
+      if (isMountedRef.current) {
+        setSubmitted(true)
+      }
+    } catch {
+      if (isMountedRef.current) {
+        setSubmitError(t.contact.submitError)
+      }
+    } finally {
+      if (isMountedRef.current) {
+        setSubmitting(false)
+      }
+    }
   }
 
   const chosenPlan = getPlanById(selectedPlan, locale)
@@ -98,18 +176,19 @@ export function ContactSection() {
                 <Check className="size-5" strokeWidth={1.5} />
               </span>
               <p className="font-heading text-xl font-bold text-stone-50">{t.contact.thanks(name)}</p>
-              {chosenPlan && (
-                <p className="text-sm text-stone-500">
-                  {t.contact.selectedPlan(chosenPlan.name, chosenPlan.price)}
-                </p>
+              {selectedPlan === UNSURE_PLAN_ID ? (
+                <p className="text-sm text-stone-500">{t.contact.selectedPlanUnsure}</p>
+              ) : (
+                chosenPlan && (
+                  <p className="text-sm text-stone-500">
+                    {t.contact.selectedPlan(chosenPlan.name, chosenPlan.price)}
+                  </p>
+                )
               )}
               <p className="text-pretty leading-loose text-stone-400">
                 {t.contact.confirmation}
               </p>
-              <div className="mt-6 w-full space-y-3">
-                <p className="text-center text-lg leading-loose text-stone-400">{t.contact.or}</p>
-                {contactInfo}
-              </div>
+              <div className="mt-6 w-full">{contactInfo}</div>
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="mx-auto mt-10 max-w-lg space-y-10">
@@ -135,6 +214,9 @@ export function ContactSection() {
                       {plan.name} — {plan.price}
                     </option>
                   ))}
+                  <option value={UNSURE_PLAN_ID} className="bg-stone-900 text-stone-50">
+                    {t.contact.unsurePlanOption}
+                  </option>
                 </select>
               </div>
 
@@ -164,22 +246,39 @@ export function ContactSection() {
                 </label>
                 <input
                   id="phone"
+                  name="phone"
                   type="tel"
-                  inputMode="tel"
+                  inputMode="numeric"
+                  autoComplete="tel"
                   dir="ltr"
                   value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
+                  onChange={handlePhoneChange}
+                  pattern="0[0-9]{8,9}"
+                  minLength={9}
+                  maxLength={10}
                   required
-                  className={`${inputClassName} text-end`}
+                  aria-invalid={phoneError ? true : undefined}
+                  aria-describedby={phoneError ? "phone-error" : undefined}
+                  className={`${inputClassName} text-end ${phoneError ? "border-red-500/70 focus:border-red-400" : ""}`}
                 />
+                {phoneError && (
+                  <p id="phone-error" className="mt-2 text-sm leading-relaxed text-red-400">
+                    {phoneError}
+                  </p>
+                )}
               </div>
 
               <div className="space-y-4">
+                {submitError && (
+                  <p className="text-center text-sm leading-relaxed text-red-400">{submitError}</p>
+                )}
+
                 <button
                   type="submit"
-                  className="btn-premium group inline-flex w-full items-center justify-center gap-2 sm:w-auto"
+                  disabled={submitting}
+                  className="btn-premium group inline-flex w-full items-center justify-center gap-2 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
                 >
-                  {t.contact.submit}
+                  {submitting ? t.contact.submitting : t.contact.submit}
                   <CtaArrow
                     className={`size-4 transition-transform duration-300 ${
                       locale === "he" ? "group-hover:-translate-x-1" : "group-hover:translate-x-1"

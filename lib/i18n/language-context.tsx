@@ -6,7 +6,7 @@ import {
   useContext,
   useEffect,
   useMemo,
-  useState,
+  useSyncExternalStore,
   type ReactNode,
 } from "react"
 import { translations, type Locale } from "@/lib/i18n/translations"
@@ -23,24 +23,35 @@ type LanguageContextValue = {
 
 const LanguageContext = createContext<LanguageContextValue | null>(null)
 
+let localeListeners: Array<() => void> = []
+
+function emitLocaleChange() {
+  localeListeners.forEach((listener) => listener())
+}
+
 function readStoredLocale(): Locale {
   if (typeof window === "undefined") return "he"
   const stored = window.localStorage.getItem(STORAGE_KEY)
   return stored === "en" ? "en" : "he"
 }
 
-export function LanguageProvider({ children }: { children: ReactNode }) {
-  const [locale, setLocaleState] = useState<Locale>("he")
-  const [ready, setReady] = useState(false)
+function subscribeLocale(callback: () => void) {
+  localeListeners.push(callback)
+  return () => {
+    localeListeners = localeListeners.filter((listener) => listener !== callback)
+  }
+}
 
-  useEffect(() => {
-    setLocaleState(readStoredLocale())
-    setReady(true)
-  }, [])
+export function LanguageProvider({ children }: { children: ReactNode }) {
+  const locale = useSyncExternalStore(
+    subscribeLocale,
+    readStoredLocale,
+    () => "he" as Locale,
+  )
 
   const setLocale = useCallback((next: Locale) => {
-    setLocaleState(next)
     window.localStorage.setItem(STORAGE_KEY, next)
+    emitLocaleChange()
   }, [])
 
   const toggleLocale = useCallback(() => {
@@ -50,10 +61,9 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   const dir = locale === "he" ? "rtl" : "ltr"
 
   useEffect(() => {
-    if (!ready) return
     document.documentElement.lang = locale
     document.documentElement.dir = dir
-  }, [locale, dir, ready])
+  }, [locale, dir])
 
   const value = useMemo(
     () => ({

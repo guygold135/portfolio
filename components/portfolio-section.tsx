@@ -1,7 +1,7 @@
 "use client"
 
 import Image from "next/image"
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import { ArrowLeft, ArrowRight } from "lucide-react"
 import { useLanguage } from "@/lib/i18n/language-context"
 import type { Project } from "@/lib/i18n/translations"
@@ -80,12 +80,21 @@ export function PortfolioSection() {
   const projects = t.portfolio.projects
   const [active, setActive] = useState(0)
   const [paused, setPaused] = useState(false)
+  const isMountedRef = useRef(false)
 
   const goTo = useCallback((index: number) => {
     setActive(index)
   }, [])
 
   useEffect(() => {
+    isMountedRef.current = true
+    return () => {
+      isMountedRef.current = false
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!isMountedRef.current) return
     setActive(0)
   }, [locale])
 
@@ -93,6 +102,7 @@ export function PortfolioSection() {
     if (paused) return
 
     const timer = setInterval(() => {
+      if (!isMountedRef.current) return
       setActive((prev) => (prev + 1) % projects.length)
     }, INTERVAL_MS)
 

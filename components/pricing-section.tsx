@@ -115,6 +115,10 @@ export function PricingSection() {
             <PlanCard key={plan.id} plan={plan} />
           ))}
         </div>
+
+        <p className="mx-auto mt-16 max-w-2xl text-center text-pretty text-base leading-loose text-stone-400 md:text-lg">
+          {t.pricing.customQuoteNote}
+        </p>
       </div>
     </section>
   )

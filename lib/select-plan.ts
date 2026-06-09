@@ -7,6 +7,8 @@ export function selectPlanAndScrollToContact(planId: string) {
   url.searchParams.set("plan", planId)
   url.hash = "contact"
   window.history.replaceState(null, "", `${url.pathname}${url.search}${url.hash}`)
-  window.dispatchEvent(new CustomEvent(PLAN_SELECTED_EVENT, { detail: planId }))
-  scrollToContact()
+  requestAnimationFrame(() => {
+    window.dispatchEvent(new CustomEvent(PLAN_SELECTED_EVENT, { detail: planId }))
+    scrollToContact()
+  })
 }
