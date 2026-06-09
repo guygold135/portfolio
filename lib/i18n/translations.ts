@@ -54,7 +54,7 @@ export const translations = {
         "פיתוח אתרים ודפי נחיתה מהירים ומותאמים אישית ב-Next.js, ממוקדי המרה במובייל, שמביאים לקוחות אמיתיים לעסקים קטנים ובינוניים.",
     },
     header: {
-      brand: "סטודיונט",
+      brand: "סטודיו-נט",
       nav: {
         portfolio: "עבודות",
         about: "למה?",
@@ -236,7 +236,7 @@ export const translations = {
         "Fast, custom-built websites and landing pages on Next.js — mobile-first, conversion-focused, and built to bring real clients to small and mid-sized businesses.",
     },
     header: {
-      brand: "studionet",
+      brand: "studio-net",
       nav: {
         portfolio: "Work",
         about: "Why?",
