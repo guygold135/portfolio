@@ -1,20 +1,18 @@
-name: Deploy
+name: Deploy Live Site
 
 on:
   push:
     branches: [main]
 
 permissions:
-  contents: read
-  pages: write
-  id-token: write
+  contents: write
 
 concurrency:
-  group: deploy-${{ github.ref }}
+  group: deploy-live-site
   cancel-in-progress: true
 
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -26,20 +24,15 @@ jobs:
 
       - run: npm ci
       - run: npm run build
-        env:
-          GITHUB_PAGES: 'true'
 
-      - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v3
+      - name: Publish to guygold135.github.io
+        uses: peaceiris/actions-gh-pages@v4
         with:
-          path: out
-
-  deploy-pages:
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - id: deployment
-        uses: actions/deploy-pages@v4
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./out
+          external_repository: guygold135/guygold135.github.io
+          publish_branch: main
+          force_orphan: true
+          user_name: github-actions[bot]
+          user_email: github-actions[bot]@users.noreply.github.com
+          commit_message: Deploy portfolio live site
