@@ -30,7 +30,7 @@ export type ValuePoint = {
 
 const sharedProjects: Omit<Project, "description">[] = [
   {
-    title: "BE PILATES studio",
+    title: "NOVA PILATES",
     url: "https://pilates1.vercel.app/",
     image: "/images/portfolio/pilates.png",
   },
@@ -91,11 +91,13 @@ export const translations = {
       viewLive: "צפייה באתר החי",
       previewAlt: (title: string) => `תצוגה מקדימה של ${title}`,
       goToProject: (title: string) => `מעבר לפרויקט ${title}`,
+      prevProject: "פרויקט קודם",
+      nextProject: "פרויקט הבא",
       projects: [
         {
           ...sharedProjects[0],
           description:
-            "דף נחיתה בוטיק ויוקרתי לסטודיו פילאטיס, עם גלילה חלקה, ביקורות מתוך Google Maps והמרה דרך טופס.",
+            "דף נחיתה בוטיק לסטודיו פילאטיס מכשירים — קבוצות קטנות, תשומת לב אישית, ביקורות לקוחות והמרה דרך טופס הרשמה.",
         },
         {
           ...sharedProjects[1],
@@ -273,11 +275,13 @@ export const translations = {
       viewLive: "View live site",
       previewAlt: (title: string) => `Preview of ${title}`,
       goToProject: (title: string) => `Go to project ${title}`,
+      prevProject: "Previous project",
+      nextProject: "Next project",
       projects: [
         {
           ...sharedProjects[0],
           description:
-            "A boutique, premium landing page for a Pilates studio — smooth scrolling, Google Maps reviews, and form-driven conversion.",
+            "A boutique landing page for a Pilates equipment studio — small groups, personal attention, client testimonials, and form-driven conversion.",
         },
         {
           ...sharedProjects[1],

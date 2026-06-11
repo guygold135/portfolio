@@ -2,7 +2,7 @@
 
 import Image from "next/image"
 import { useCallback, useEffect, useRef, useState } from "react"
-import { ArrowLeft, ArrowRight } from "lucide-react"
+import { ArrowLeft, ArrowRight, ChevronLeft, ChevronRight } from "lucide-react"
 import { useLanguage } from "@/lib/i18n/language-context"
 import type { Project } from "@/lib/i18n/translations"
 
@@ -86,6 +86,17 @@ export function PortfolioSection() {
     setActive(index)
   }, [])
 
+  const goPrev = useCallback(() => {
+    setActive((prev) => (prev - 1 + projects.length) % projects.length)
+  }, [projects.length])
+
+  const goNext = useCallback(() => {
+    setActive((prev) => (prev + 1) % projects.length)
+  }, [projects.length])
+
+  const PrevIcon = locale === "he" ? ChevronRight : ChevronLeft
+  const NextIcon = locale === "he" ? ChevronLeft : ChevronRight
+
   useEffect(() => {
     isMountedRef.current = true
     return () => {
@@ -128,6 +139,24 @@ export function PortfolioSection() {
           onFocus={() => setPaused(true)}
           onBlur={() => setPaused(false)}
         >
+          <button
+            type="button"
+            onClick={goPrev}
+            aria-label={t.portfolio.prevProject}
+            className="absolute top-1/2 left-0 z-20 flex size-8 -translate-y-1/2 items-center justify-center rounded-full border border-stone-600/80 bg-stone-900/90 text-stone-400 backdrop-blur-sm transition-all hover:border-stone-400 hover:bg-stone-800 hover:text-stone-50 md:-left-4"
+          >
+            <PrevIcon className="size-4" />
+          </button>
+
+          <button
+            type="button"
+            onClick={goNext}
+            aria-label={t.portfolio.nextProject}
+            className="absolute top-1/2 right-0 z-20 flex size-8 -translate-y-1/2 items-center justify-center rounded-full border border-stone-600/80 bg-stone-900/90 text-stone-400 backdrop-blur-sm transition-all hover:border-stone-400 hover:bg-stone-800 hover:text-stone-50 md:-right-4"
+          >
+            <NextIcon className="size-4" />
+          </button>
+
           {projects.map((project, index) => (
             <ProjectSlide
               key={project.title}
