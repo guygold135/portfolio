@@ -1,5 +1,6 @@
 import { Analytics } from '@vercel/analytics/next'
 import type { Metadata } from 'next'
+import { MicrosoftClarity } from '@/components/microsoft-clarity'
 import { Heebo, Assistant } from 'next/font/google'
 import './globals.css'
 
@@ -51,7 +52,12 @@ export default function RootLayout({
     >
       <body className="font-sans antialiased">
         {children}
-        {process.env.NODE_ENV === 'production' && <Analytics />}
+        {process.env.NODE_ENV === 'production' && (
+          <>
+            <Analytics />
+            <MicrosoftClarity />
+          </>
+        )}
       </body>
     </html>
   )
