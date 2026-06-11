@@ -1,38 +1,14 @@
-name: Deploy Live Site
+name: Trigger Live Site Deploy
 
 on:
   push:
     branches: [main]
 
 permissions:
-  contents: write
-
-concurrency:
-  group: deploy-live-site
-  cancel-in-progress: true
+  contents: read
 
 jobs:
-  deploy:
+  note:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: npm
-
-      - run: npm ci
-      - run: npm run build
-
-      - name: Publish to guygold135.github.io
-        uses: peaceiris/actions-gh-pages@v4
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./out
-          external_repository: guygold135/guygold135.github.io
-          publish_branch: main
-          force_orphan: true
-          user_name: github-actions[bot]
-          user_email: github-actions[bot]@users.noreply.github.com
-          commit_message: Deploy portfolio live site
+      - run: echo "Live site auto-sync runs from guygold135/guygold135.github.io every 30 minutes."
